@@ -173,11 +173,7 @@ contract BondingCurveToken is ERC20, Ownable, Pausable {
         uint256 discriminant = b * b + 4 * a * c ;
         require(discriminant >= 0, "No real solution");
 
-        console.log("Discriminant:", discriminant);
-
         uint256 sqrtDiscriminant = sqrt(discriminant);
-
-        console.log("Sqrt Discriminant:", sqrtDiscriminant);
 
         uint256 numerator = sqrtDiscriminant - b;
         uint256 denominator = 2 * a;
@@ -186,27 +182,13 @@ contract BondingCurveToken is ERC20, Ownable, Pausable {
 
         uint256 tokenAmount = numerator * 1e18 / denominator;
 
-        console.log("Token Amount:", tokenAmount);
-
         return tokenAmount;
     }
 
      function buyFromContract(uint256 amount, uint256 ethAmount) external payable onlyMarket {
-        console.log('===buyFromContract===');
-        console.log('address(this).balance:',address(this).balance);
-        console.log('amount:',amount);
-        console.log('ethAmount:',ethAmount);
-        console.log('msg.value:',msg.value);
-        // require(address(marketContract).balance >= ethAmount, "Insufficient balance in contract");
         require(msg.value >= ethAmount, "Incorrect payment amount");
-        // require(ethAmount >= calculateTotalCost(amount), "Insufficient payment");
-        
 
-        // 執行購買邏輯
         _mint(marketContract, amount);
-        // reserveBalance += ethAmount;
-
-        console.log('===over buyFromContract===');
 
         emit BuyToken(marketId, optionId, marketContract, ethAmount, amount, ethAmount / amount);
         emit PriceChange(marketId, optionId, block.timestamp, calculatePrice(totalSupply()));
@@ -225,12 +207,10 @@ contract BondingCurveToken is ERC20, Ownable, Pausable {
 
         uint256 creatorShare = cost * feePercentage / (1000+feePercentage+feePercentage);
         uint256 platformShare = cost * feePercentage / (1000+feePercentage+feePercentage);
-        // uint256 totalCost = cost + creatorShare + platformShare;
 
         require(msg.value >= cost, "Insufficient payment");
 
         _mint(msg.sender, tokenAmount);
-        // reserveBalance += cost;
 
         uint256 avgPrice = cost * 1e18 / tokenAmount;
 
@@ -261,21 +241,9 @@ contract BondingCurveToken is ERC20, Ownable, Pausable {
         uint256 creatorShare = origin_proceeds * feePercentage / 1000;
         uint256 platformShare = origin_proceeds * feePercentage / 1000;
 
-        // uint256 creatorShare = proceeds * feePercentage / (1000-feePercentage-feePercentage);
-        // uint256 platformShare = proceeds * feePercentage / (1000-feePercentage-feePercentage);
-
-        console.log('creatorShare:',creatorShare);
-        console.log('platformShare:',platformShare);
-        // uint256 totalProceeds = proceeds - creatorShare - platformShare;
-
-        console.log('proceeds:',proceeds);
-
-        console.log('eth in contract:',address(this).balance);
-
         require(address(this).balance >= proceeds + creatorShare + platformShare, "Insufficient reserve to pay out");
 
         _burn(msg.sender, tokenAmount);
-        // reserveBalance -= proceeds;
 
         uint256 avgPrice = proceeds * 1e18 / tokenAmount;
 
